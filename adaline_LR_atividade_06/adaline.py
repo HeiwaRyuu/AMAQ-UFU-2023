@@ -208,8 +208,11 @@ def main():
     print("Pearson Correlation: ", pearson_correlation)
 
     ## FIND DET COEFFICIENT
-    det_coefficient = np.linalg.det(np.cov(X, t))
-    print("Det Coefficient: ", det_coefficient)
+    corr_matrix = np.corrcoef(X, t)
+    corr = corr_matrix[0,1]
+    R_sq = corr**2
+    
+    print("Det Coefficient: ", R_sq)
 
 
     plt.show()
