@@ -1,10 +1,6 @@
-## CREATE ME A USER GUI WITH 5X5 SQUARES THAT CAN CHANGE COLOR BASED ON USER CLICK
-## ALSO, CREATE A BUTTON THAT WILL CLEAR THE BOARD
-## ALSO CREATE A BUTTON THAT WILL CALL A FUNCTION CALLED perceptron_digit_training
-
+import os
 import tkinter as tk
 import customtkinter as ctk
-# import CTkMessagebox as ctkmsg
 from perceptron_class import Perceptron
 
 ## GLOBAL VARIABLES
@@ -42,16 +38,10 @@ PREDICTION_LABEL_Y_POSITION = FUNCTION_BUTTON_Y_POSITION+FUNCTION_BUTTON_HEIGHT+
 ## NEURONS SETTINGS
 NUMBER_OF_NEURONS = 10
 
-## SYSTEM SETTINGS
-# ctk.set_appearance_mode("System")
-# ctk.set_default_color_theme("blue")
-
 
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
-        
-        
         self.geometry(f"{CANVAS_WIDTH}x{CANVAS_HEIGHT}")
         self.title("Perceptron Digit Training")
         self.resizable(False, False)
@@ -62,26 +52,22 @@ class App(ctk.CTk):
         self.trained_neurons = []
 
         ## ADDING UI ELEMENTS
-        ## ADDING THE GRID OF BUTTONS
         self.generate_button_grid()
+        ## GENERATE PREDICTION FILE IF NOT EXISTS
+        self.read_list_of_predictions()
+        print(self.list_of_predictions)
         ## INITIALIZING THE NEURONS
         self.generate_neuron()
-
-
         ## MEANING LABELS
         self.lbl_meaning = ctk.CTkLabel(self, text="Meaning: ", width=MEANING_LABEL_WIDTH, height=MEANING_LABEL_HEIGHT)
         self.lbl_meaning.place(x=MEANING_LABEL_WIDTH_OFFSET, y=MEANING_LABEL_Y_POSITION)
         self.entry_meaning_value = ctk.CTkEntry(self, placeholder_text="CTkEntry", width=MEANING_LABEL_WIDTH, height=MEANING_LABEL_HEIGHT, fg_color=INITIAL_COLOR)
         self.entry_meaning_value.place(x=MEANING_LABEL_WIDTH_OFFSET+MEANING_LABEL_WIDTH, y=MEANING_LABEL_Y_POSITION)
-
-
         ## PREDICTION LABELS
         self.lbl_prediction = ctk.CTkLabel(self, text="Prediction: ", width=PREDICTION_LABEL_WIDTH, height=PREDICTION_LABEL_HEIGHT)
         self.lbl_prediction.place(x=PREDICTION_LABEL_WIDTH_OFFSET, y=PREDICTION_LABEL_Y_POSITION)
         self.lbl_prediction_value = ctk.CTkLabel(self, text="?", width=PREDICTION_LABEL_WIDTH, height=PREDICTION_LABEL_HEIGHT)
         self.lbl_prediction_value.place(x=PREDICTION_LABEL_WIDTH_OFFSET+PREDICTION_LABEL_WIDTH, y=PREDICTION_LABEL_Y_POSITION)
-
-
         ## ADDING THE BUTTONS
         self.btn_clear = ctk.CTkButton(self, text="Clear", command=self.clear_board, width=FUNCTION_BUTTON_WIDTH, height=FUNCTION_BUTTON_HEIGHT)
         self.btn_clear.place(x=FUNCTION_BUTTON_WIDTH_OFFSET-XPADDING, y=FUNCTION_BUTTON_Y_POSITION)
@@ -147,25 +133,43 @@ class App(ctk.CTk):
             self.current_neuron_count += 1
 
         if self.entry_meaning_value.get() == "":
-            ##ALERT USER TO NOT LEAVE BLANK WITH ALERT BOX
             print("RETURNING...")
             return
-            # self.show_warning()
-
         ## IF AND ITEM IS NOT IN THE LIST, INSERT, IF AN ITEM IS ALREADY IN THE LIST, UPDATE ITS MEANING
         is_in_prediction_list, prediction_list_index = self.check_if_in_prediction_list(color_vector=color_vector)
         if (not is_in_prediction_list):
             self.list_of_predictions.append([color_vector, self.entry_meaning_value.get()])
         else:
             self.list_of_predictions[prediction_list_index][1] = self.entry_meaning_value.get()
-        
         print("color_vector: ", color_vector)
         print("list_of_predictions: ", self.list_of_predictions)
 
-        ## PREDICT
         self.predict()
-        
+        self.save_list_of_predictions()
+    
 
+    def read_list_of_predictions(self):
+        if os.path.isfile('predictions.txt'):
+            with open('predictions.txt', 'r') as f:
+                prediction_str = f.readlines()
+                for pred_str in prediction_str:
+                    color_vect, value = pred_str.split(':')
+                    color_vect = color_vect.strip('[]').split(', ') ## CONVERT STR LIST REPRESENTATION TO ACTUAL LIST
+                    color_vect = [eval(i) for i in color_vect] ## CONVERT ELEMENTS OF THE LIST BACK TO INT
+                    value = eval(value.split('\n')[0]) ## CONVERT VALUE TO INT
+                    lst = [color_vect, value]
+                    self.list_of_predictions.append(lst)
+        else:
+            with open('predictions.txt', 'w') as f: ## CREATES FILE IT NOT EXISTS
+                pass
+
+
+    def save_list_of_predictions(self):
+        with open('predictions.txt', 'w+') as f:
+            for prediction in self.list_of_predictions:
+                pred_str = str(prediction[0])+':'+str(prediction[1])+'\n'
+                f.write(pred_str)
+        
 
     def check_if_in_prediction_list(self, color_vector):
         for i, item in enumerate(self.list_of_predictions):
@@ -190,13 +194,7 @@ class App(ctk.CTk):
         else:
             self.lbl_prediction_value.configure(text="?")
 
-    # ## UTILITIES
-    # def show_warning():
-    #     # Show some retry/cancel warnings
-    #     ctkmsg(title="Warning Message!", message="Do not Leave the Meaning Field Blank!",icon="warning", option_1="Ok")
-
 def main():
-    ## RUN APP
     app = App()
     app.mainloop()
 
