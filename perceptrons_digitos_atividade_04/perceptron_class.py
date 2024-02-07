@@ -1,4 +1,4 @@
-## DEFININDO CLASSE PERCEPTRON
+## DEFININDO CLASSE PERCEPTRON // REVIEWED
 class Perceptron:
     def __init__(self, weights, bias):
         self.weights = [0 for x in range(len(weights))]

@@ -55,7 +55,6 @@ class App(ctk.CTk):
         self.generate_button_grid()
         ## GENERATE PREDICTION FILE IF NOT EXISTS
         self.read_list_of_predictions()
-        print(self.list_of_predictions)
         ## INITIALIZING THE NEURONS
         self.generate_neuron()
         ## MEANING LABELS
